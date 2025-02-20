@@ -31,7 +31,6 @@ void setup() {
 //  connectMQTT();
   initTemperatureSensor();  // Initialize the temperature sensor
 
-  initSerial();  // PZEM
 
   initReedSwitch();  // REED Switch
 
@@ -80,7 +79,7 @@ void loop() {
 
   //------------------Printing Data TO Serial Moniter-----------------------------------------------------------
   dataPrinting();
-  dataToWrite(temperature,humidity,tempDS18B20,doorState,doorCount);
+  dataToWrite(temperature,humidity,tempDS18B20,doorState,doorCount,voltage,current,power,energy,frequency,pf);
   logDataToSD(logEntry); 
 
   delay(10);

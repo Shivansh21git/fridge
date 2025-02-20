@@ -9,7 +9,7 @@
 // Function declarations
 void setupDHT22();        // Setup DHT22 sensor
 void dataPrinting();     // Read temperature and humidity from DHT22 sensor
-void printDHT22Data();    // Print the data to the Serial Monitor
+void readDHT22Data();    // Print the data to the Serial Monitor
 //String dataToWrite();
 void handleMQTT();
 
@@ -19,6 +19,12 @@ DHT dht(DHT_PIN, DHT_TYPE);
 // Initialize global variables
 float temperature = 0.0;
 float humidity = 0.0;
+float voltage=0.0;
+float current=0.0;
+float power=0.0;
+float energy=0.0;
+float frequency=0.0;
+float pf=0.0;
  String logEntry = "";
 // unsigned long lastTime = 0;
 
@@ -62,7 +68,7 @@ float tempDS18B20 = 0.0;
 OneWire oneWire(ONE_WIRE_BUS);
 DallasTemperature sensors(&oneWire);
 
-PZEM004Tv30 pzem(PZEM_SERIAL, PZEM_RX_PIN, PZEM_TX_PIN);
+PZEM004Tv30 pzem(Serial2, PZEM_RX_PIN, PZEM_TX_PIN);
 
 void setupIRSensor();        // Setup IR sensor and interrupt
 void calculateRPM();         // Calculate RPM based on pulse count
@@ -295,9 +301,6 @@ void initTemperatureSensor() {
 }
 
 
-void initSerial() {
-    CONSOLE_SERIAL.begin(115200);
-}
 
 
 
@@ -306,53 +309,47 @@ void initSerial() {
 void readTemperature() {
     sensors.requestTemperatures();  // Request temperature data
    tempDS18B20 = sensors.getTempCByIndex(0);  // Read temperature
-
-    Serial.print("DS18B20 -> Temperature: ");
-    Serial.println(tempDS18B20);  // Print temperature
-
    // delay(2000);  // Wait 2 seconds before next reading
 }
 
 // Function to read and print PZEM sensor data
 void readPZEMData() {
-    // Print the custom address of the PZEM
-    CONSOLE_SERIAL.print("Custom Address:");
-    CONSOLE_SERIAL.println(pzem.readAddress(), HEX);
 
     // Read sensor data
-    float voltage = pzem.voltage();
-    float current = pzem.current();
-    float power = pzem.power();
-    float energy = pzem.energy();
+     voltage = pzem.voltage();
+     current = pzem.current();
+     power = pzem.power();
+     energy = pzem.energy();
+     frequency = pzem.frequency();
+     pf = pzem.pf();
 
     // Check for valid data
     if (isnan(voltage)) {
-        CONSOLE_SERIAL.println("Error reading voltage");
+        Serial.println("Error reading voltage");
     } else if (isnan(current)) {
-        CONSOLE_SERIAL.println("Error reading current");
+        Serial.println("Error reading current");
     } else if (isnan(power)) {
-        CONSOLE_SERIAL.println("Error reading power");
+        Serial.println("Error reading power");
     } else if (isnan(energy)) {
-        CONSOLE_SERIAL.println("Error reading energy");
-    } else {
-        // Print values
-        CONSOLE_SERIAL.print("Voltage: ");  CONSOLE_SERIAL.print(voltage);  CONSOLE_SERIAL.println("V");
-        CONSOLE_SERIAL.print("Current: ");  CONSOLE_SERIAL.print(current);  CONSOLE_SERIAL.println("A");
-        CONSOLE_SERIAL.print("Power: ");    CONSOLE_SERIAL.print(power);    CONSOLE_SERIAL.println("W");
-        CONSOLE_SERIAL.print("Energy: ");   CONSOLE_SERIAL.print(energy, 3);CONSOLE_SERIAL.println("kWh");
+        Serial.println("Error reading energy");
     }
-    CONSOLE_SERIAL.println();
-    delay(2000);
+
 }
 
- String dataToWrite(float temperature, float humidity, float tempDS18B20, bool doorState, int doorCount){
+ String dataToWrite(float temperature, float humidity, float tempDS18B20, bool doorState, int doorCount, float voltage, float current, float power, float energy, float frequency, float pf){
    
-   
-        logEntry = "DHT Temp: " + String(temperature) + "°C, ";
+    
+    logEntry = "{ DHT Temp: " + String(temperature) + "°C, ";
     logEntry += "DHT Humidity: " + String(humidity) + "%, ";
     logEntry += "DS18B20 Temp: " + String(tempDS18B20) + "°C, ";
-   logEntry += "Door Status: " + String(doorState) + ",";
-    logEntry += "Door Count: " + String(doorCount) + "°C";
+    logEntry += "Door Status: " + String(doorState) + ",";
+    logEntry += "Voltage: " + String(voltage) + "V ";
+    logEntry += "Current: " + String(current) + "A ";
+    logEntry += "Power: " + String(power) + "W ";
+    logEntry += "Energy: " + String(energy) + "KWH ";
+    logEntry += "Frequency: " + String(frequency) + "Hz ";
+    logEntry += "Power Factor: " + String(pf) + " ";
+    logEntry += "Door Count: " + String(doorCount) + "}";
 
     return logEntry;
  }
@@ -361,7 +358,7 @@ void readPZEMData() {
 
 void dataPrinting()
 {
-    Serial.print("Temperature: ");
+  Serial.print("Temperature: ");
   Serial.print(temperature);
   Serial.print("°C  Humidity: ");
   Serial.print(humidity);
@@ -373,7 +370,13 @@ void dataPrinting()
   Serial.println(doorState ? "OPEN" : "CLOSED");
   Serial.print("Door open/close count: ");
   Serial.println(doorCount);
-
+  Serial.print("Voltage: ");  Serial.print(voltage);  Serial.println("V");
+  Serial.print("Current: ");  Serial.print(current);  Serial.println("A");
+  Serial.print("Power: ");    Serial.print(power);    Serial.println("W");
+  Serial.print("Energy: ");   Serial.print(energy);   Serial.println("kWh");
+  Serial.print("frequency: ");   Serial.print(frequency);Serial.println("kWh");
+  Serial.print("pf : ");   Serial.println(pf);
+    
 }
 
 

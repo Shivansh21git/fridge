@@ -12,8 +12,7 @@
 #define PZEM_RX_PIN 16
 #define PZEM_TX_PIN 17
 
-#define PZEM_SERIAL Serial2
-#define CONSOLE_SERIAL Serial
+
 // PZEM004Tv30 pzem(PZEM_SERIAL, PZEM_RX_PIN, PZEM_TX_PIN);
 
 #define REED_SWITCH_PIN 27  // GPIO pin for the reed switch
