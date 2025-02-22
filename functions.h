@@ -4,7 +4,7 @@
 #include "header.h"
 #include "pinconfiguration.h"
 
-#define DHT_TYPE DHT22
+#define DHT_TYPE DHT11
 
 // Function declarations
 void setupDHT22();        // Setup DHT22 sensor
