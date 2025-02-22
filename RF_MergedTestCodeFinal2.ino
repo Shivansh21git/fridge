@@ -22,13 +22,15 @@ void IRAM_ATTR pulseDetected() {
 
 
 void setup() {
+   initrelay();
   Serial.begin(115200);  // Initialize Serial Monitor
   setupWiFi();
   //Setup MQTT
-//  setupMQTT();
+setupMQTT();
 
   // Connect to MQTT Broker
-//  connectMQTT();
+ connectMQTT();
+ 
   initTemperatureSensor();  // Initialize the temperature sensor
 
 
@@ -38,8 +40,8 @@ void setup() {
 
   setupIRSensor();      // Setup the IR sensor and interrupt
   lastTime = millis();  // Initialize last time
-  setupWiFi();
-  // client.setServer(mqttServer, 1883);
+ // setupWiFi();
+ client.setServer(mqttServer, 1883);
 
   if (!SD.begin(SD_CS)) {
     Serial.println("\u274C SD Card Mount Failed!");
@@ -47,17 +49,19 @@ void setup() {
   }
 
   sdMutex = xSemaphoreCreateMutex();  // Initialize Mutex for SD Card
-  // reconnectMQTT();
-  // client.publish("iot/handshake", "-1");
+ reconnectMQTT();
+  // handshake();
+  
+  //client.publish("iot/handshake", "-1");
 
   // Create FreeRTOS Task
- // xTaskCreatePinnedToCore(sendDataToCloud, "MqttTask", 4096, NULL, 1, NULL, 0);
+ xTaskCreatePinnedToCore(sendDataToCloud, "MqttTask", 4096, NULL, 1, NULL, 0);
 }
 
 void loop() {
 
-//   client.loop();
-//  handleMQTT();  // Maintain MQTT connection
+  client.loop();
+ handleMQTT();  // Maintain MQTT connection
 
     // Request data every 10 seconds
     // static unsigned long lastRequestTime = 0;
@@ -66,24 +70,24 @@ void loop() {
     //     requestDataFromMQTT();
     // }
 
-  // Read and print DHT22 data every 2 seconds
-  if (millis() - lastTime >= 2000) {  // Read every 2 seconds
+  // Read sensors data every 2 seconds
+  if (millis() - lastTime >= 5000) {  // Read every 2 seconds
     readDHT22Data();                  // Read data from DHT22 sensor
     readTemperature();                // Ds18b20 Temperature
+    readPZEMData();  // Electrical
     lastTime = millis();              // Reset the timer
+    dataToPacket(temperature,humidity,tempDS18B20,doorState,doorCount,voltage,current,power,energy,frequency,pf,rpm,relayState);
+    logDataToSD(logEntry); 
   }
 
 
-  readPZEMData();  // Electrical
-  processDoorState();  // Handle door open/close events
 
+  processDoorState();  // Handle door open/close events
+  calculateRPM();  // Continuously calculate RPM every second
   //------------------Printing Data TO Serial Moniter-----------------------------------------------------------
   dataPrinting();
-  dataToWrite(temperature,humidity,tempDS18B20,doorState,doorCount,voltage,current,power,energy,frequency,pf);
-  logDataToSD(logEntry); 
 
-  delay(10);
+  delay(5000);
 
     //logDataToSD(data);
- // calculateRPM();  // Continuously calculate RPM every second
 }
