@@ -1,14 +1,14 @@
 #ifndef PINCONFIGURATION_H
 #define PINCONFIGURATION_H
 
-#define ONE_WIRE_BUS 21  // Define the GPIO pin for DS18B20 sensor
+#define ONE_WIRE_BUS 33  // Define the GPIO pin for DS18B20 sensor
 
 // Define the pin for the IR sensor
 #define IR_SENSOR_PIN 32
 // Definr Relay Pin
 #define Relay 4
 // Define the pin for the DHT22 sensor
-#define DHT_PIN 22  // Change this to the correct pin connected to DHT22 sensor
+#define DHT_PIN 27  // Change this to the correct pin connected to DHT22 sensor
 
 #define PZEM_RX_PIN 16
 #define PZEM_TX_PIN 17

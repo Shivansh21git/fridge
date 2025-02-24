@@ -29,7 +29,7 @@ void setup() {
 setupMQTT();
 
   // Connect to MQTT Broker
- connectMQTT();
+ //connectMQTT();
  
   initTemperatureSensor();  // Initialize the temperature sensor
 
@@ -49,19 +49,19 @@ setupMQTT();
   }
 
   sdMutex = xSemaphoreCreateMutex();  // Initialize Mutex for SD Card
- reconnectMQTT();
+ //reconnectMQTT();
   // handshake();
   
   //client.publish("iot/handshake", "-1");
 
   // Create FreeRTOS Task
- xTaskCreatePinnedToCore(sendDataToCloud, "MqttTask", 4096, NULL, 1, NULL, 0);
+//  xTaskCreatePinnedToCore(sendDataToCloud, "MqttTask", 4096, NULL, 1, NULL, 0);
 }
 
 void loop() {
 
-  client.loop();
- handleMQTT();  // Maintain MQTT connection
+//   client.loop();
+//  handleMQTT();  // Maintain MQTT connection
 
     // Request data every 10 seconds
     // static unsigned long lastRequestTime = 0;
@@ -75,15 +75,17 @@ void loop() {
     readDHT22Data();                  // Read data from DHT22 sensor
     readTemperature();                // Ds18b20 Temperature
     readPZEMData();  // Electrical
-    lastTime = millis();              // Reset the timer
+     calculateRPM();  // Continuously calculate RPM every second
+
     dataToPacket(temperature,humidity,tempDS18B20,doorState,doorCount,voltage,current,power,energy,frequency,pf,rpm,relayState);
     logDataToSD(logEntry); 
+    lastTime = millis();              // Reset the timer
   }
 
 
 
   processDoorState();  // Handle door open/close events
-  calculateRPM();  // Continuously calculate RPM every second
+ 
   //------------------Printing Data TO Serial Moniter-----------------------------------------------------------
   dataPrinting();
 
