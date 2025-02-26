@@ -74,7 +74,7 @@ void loop() {
     // }
 
   // Read sensors data every 2 seconds
-  if (millis() - lastTime >= 2000) {  // Read every 2 seconds
+  if (millis() - lastTime >= 5000) {  // Read every 2 seconds
     readDHT22Data();                  // Read data from DHT22 sensor
     readTemperature();                // Ds18b20 Temperature
     readPZEMData();  // Electrical
@@ -86,11 +86,11 @@ void loop() {
     lastTime = millis();              // Reset the timer
   }
     // 🔄 Check time every 10 minutes (600000 ms)
-  static unsigned long lastSync = 0;
-  if (millis() - lastSync > 120000) {
-      lastSync = millis();
-      syncRTCWithNTP();
-  }
+  // static unsigned long lastSync = 0;
+  // if (millis() - lastSync > 120000) {
+  //     lastSync = millis();
+  //     syncRTCWithNTP();
+  // }
 
 
   processDoorState();  // Handle door open/close events
@@ -100,7 +100,7 @@ void loop() {
 
 
 
-  delay(5000);
+  // delay(5000);
 
     //logDataToSD(data);
 }

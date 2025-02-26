@@ -349,6 +349,7 @@ void sendDataToCloud(void *parameter) {
                 while (file.available()) {
                     String line = file.readStringUntil('\n');
                     client.publish("iot/dataCM", line.c_str());
+                  
                     delay(500);
                 }
                 file.close();
