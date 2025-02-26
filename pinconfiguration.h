@@ -22,8 +22,8 @@
 #define SD_CS 5  // SD Card Chip Select
 
 // WiFi & MQTT Credentials
-const char* ssid = "shiv5G";
-const char* password = "123456789";
+const char* ssid = "Kumar 2";
+const char* password = "ipl@2023";
 // const char* ssid = "Airtel_amit_4422";
 // const char* password = "Abhay4422";
 // const char* mqtt_server = "your_MQTT_BROKER";

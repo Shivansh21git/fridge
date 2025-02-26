@@ -29,7 +29,7 @@ void setup() {
 setupMQTT();
 
   // Connect to MQTT Broker
- //connectMQTT();
+ connectMQTT();
  
   initTemperatureSensor();  // Initialize the temperature sensor
 
@@ -39,6 +39,9 @@ setupMQTT();
   setupDHT22();  // Initialize the DHT22 sensor
 
   setupIRSensor();      // Setup the IR sensor and interrupt
+  rtcSetup();
+  syncRTCWithNTP();
+
   lastTime = millis();  // Initialize last time
  // setupWiFi();
  client.setServer(mqttServer, 1883);
@@ -49,19 +52,19 @@ setupMQTT();
   }
 
   sdMutex = xSemaphoreCreateMutex();  // Initialize Mutex for SD Card
- //reconnectMQTT();
+ reconnectMQTT();
   // handshake();
   
   //client.publish("iot/handshake", "-1");
 
   // Create FreeRTOS Task
-//  xTaskCreatePinnedToCore(sendDataToCloud, "MqttTask", 4096, NULL, 1, NULL, 0);
+ xTaskCreatePinnedToCore(sendDataToCloud, "MqttTask", 4096, NULL, 1, NULL, 0);
 }
 
 void loop() {
 
-//   client.loop();
-//  handleMQTT();  // Maintain MQTT connection
+  client.loop();
+ handleMQTT();  // Maintain MQTT connection
 
     // Request data every 10 seconds
     // static unsigned long lastRequestTime = 0;
@@ -71,25 +74,35 @@ void loop() {
     // }
 
   // Read sensors data every 2 seconds
-  if (millis() - lastTime >= 5000) {  // Read every 2 seconds
+  if (millis() - lastTime >= 2000) {  // Read every 2 seconds
     readDHT22Data();                  // Read data from DHT22 sensor
     readTemperature();                // Ds18b20 Temperature
     readPZEMData();  // Electrical
-     calculateRPM();  // Continuously calculate RPM every second
-
-    dataToPacket(temperature,humidity,tempDS18B20,doorState,doorCount,voltage,current,power,energy,frequency,pf,rpm,relayState);
+    calculateRPM();  // Continuously calculate RPM every second
+    getTimeStamp();
+    dataToPacket(temperature,humidity,tempDS18B20,doorState,doorCount,voltage,current,power,energy,frequency,pf,rpm,relayState,dateTimeStr);
     logDataToSD(logEntry); 
+     dataPrinting();
     lastTime = millis();              // Reset the timer
   }
-
+    // 🔄 Check time every 10 minutes (600000 ms)
+  static unsigned long lastSync = 0;
+  if (millis() - lastSync > 120000) {
+      lastSync = millis();
+      syncRTCWithNTP();
+  }
 
 
   processDoorState();  // Handle door open/close events
  
   //------------------Printing Data TO Serial Moniter-----------------------------------------------------------
-  dataPrinting();
+
+
+
 
   delay(5000);
 
     //logDataToSD(data);
 }
+
+

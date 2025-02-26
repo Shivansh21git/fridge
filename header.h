@@ -4,6 +4,10 @@
 #include <Arduino.h>
 #include <OneWire.h>
 #include <DallasTemperature.h>
+#include <NTPClient.h>       // For getting time from NTP server
+#include <WiFiUdp.h>         // UDP for NTP
+#include <Wire.h>
+#include <RTClib.h>          // Library for DS3231/DS1307 RTC
 
 
 #include <Arduino.h>

@@ -11,10 +11,16 @@ void setupDHT22();        // Setup DHT22 sensor
 void dataPrinting();     // Read temperature and humidity from DHT22 sensor
 void readDHT22Data();    // Print the data to the Serial 
 void initrelay();
+void getTimeStamp();
+void rtcSetup();
+void syncRTCWithNTP();
+
+
 String dataToPacket();
 bool HSA_Flag = true;
 String relayState = "";
-String c ="";
+String c = "";
+String dateTimeStr = "";
 //String dataToWrite();
 void handleMQTT();
 
@@ -103,6 +109,75 @@ void calculateRPM() {
     lastTime = millis();               // Reset last time for next RPM calculation
   }
 }
+
+//------------------------------------------------RTC Config------------------------------------------------------------------------------------------
+
+
+RTC_DS3231 rtc;  // Change to RTC_DS1307 rtc; if using DS1307
+WiFiUDP ntpUDP;
+NTPClient timeClient(ntpUDP, "in.pool.ntp.org", 19800, 60000);
+
+
+void rtcSetup(){
+  Wire.begin();
+  // ✅ Start NTP Client
+  timeClient.begin();
+
+    // ✅ Initialize RTC
+    if (!rtc.begin()) {
+        Serial.println("❌ RTC Not Found!");
+        while (1);
+    }
+     
+    if (rtc.lostPower()) {
+        Serial.println("⚠️ RTC lost power! Syncing time...");
+        syncRTCWithNTP();
+    }
+    //syncRTCWithNTP();
+
+}
+
+
+
+void getTimeStamp(){
+
+  DateTime now = rtc.now();
+    
+      dateTimeStr = String(now.year()) + "-" + 
+                     String(now.month()) + "-" + 
+                     String(now.day()) + " " + 
+                     String(now.hour()) + ":" + 
+                     String(now.minute()) + ":" + 
+                     String(now.second());
+Serial.println(dateTimeStr);
+}
+
+
+// ✅ Sync RTC Time with NTP
+void syncRTCWithNTP() {
+    Serial.println("🌍 Syncing RTC with NTP...");
+    timeClient.update();
+
+    int ntpHour = timeClient.getHours();
+    int ntpMinute = timeClient.getMinutes();
+    int ntpSecond = timeClient.getSeconds();
+    int ntpDay = timeClient.getDay();  // 0 = Sunday
+    int ntpEpoch = timeClient.getEpochTime();
+
+    DateTime ntpTime = DateTime(ntpEpoch);
+    
+    // ✅ Compare RTC time with NTP time
+    DateTime now = rtc.now();
+if (abs((int32_t)(now.unixtime() - ntpTime.unixtime())) > 30) {  
+    rtc.adjust(ntpTime);
+    Serial.println("✅ RTC Updated!");
+}
+ else {
+        Serial.println("⏳ RTC Time is already accurate.");
+    }
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------------------
 
 
 
@@ -325,7 +400,7 @@ void processDoorState() {
             doorState = newState;
             doorCount++;
       Serial.print("Door state changed: ");
-    c = doorState ? "CLOSED" : "OPEN";
+    c = doorState ? "OPEN" : "CLOSED";
   Serial.println(c);
       Serial.print("Door open/close count: ");
       Serial.println(doorCount);
@@ -392,13 +467,14 @@ void relayon(){
 }
 
 
- String dataToPacket(float temperature, float humidity, float tempDS18B20, bool doorState, int doorCount, float voltage, float current, float power, float energy, float frequency, float pf,float rpm, String relayState){
+ String dataToPacket(float temperature, float humidity, float tempDS18B20, bool doorState, int doorCount, float voltage, float current, float power, float energy, float frequency, float pf,float rpm, String relayState, String dateTimeStr){
    
-    
-    logEntry = "{ DHT Temp: " + String(temperature) + "C, ";
-    logEntry += "DHT Humidity: " + String(humidity) + "%, ";
+    logEntry = "{ TimeStamp: " + String(dateTimeStr) + " ";
+    logEntry += "DHT Temp: " + String(temperature) + "C, ";
+    logEntry += "DHT Humidity: " + String(humidity) + ", ";
     logEntry += "DS18B20 Temp: " + String(tempDS18B20) + "C, ";
     logEntry += "Door Status: " + String(doorState) + ",";
+    logEntry += "Door Count: " + String(doorCount) + ", ";
     logEntry += "Voltage: " + String(voltage) + "V, ";
     logEntry += "Current: " + String(current) + "A, ";
     logEntry += "Power: " + String(power) + "W, ";
@@ -406,8 +482,10 @@ void relayon(){
     logEntry += "Frequency: " + String(frequency) + "Hz, ";
     logEntry += "Power Factor: " + String(pf) + ", ";
     logEntry += "Fan RPM: " + String(rpm) + ", ";
-    logEntry += "Door Count: " + String(doorCount) + ", ";
     logEntry += "Power Status: " + String(relayState) + "}";
+    Serial.println("Log Entry Completed!");
+    Serial.println(logEntry);
+
 
     return logEntry;
  }
@@ -425,7 +503,7 @@ void dataPrinting()
   Serial.print(tempDS18B20);  // Print temperature
   Serial.println("°C");
   Serial.print("Door Status: ");
-  Serial.println(doorState ? "CLOSED" : "OPEN");
+  Serial.println(doorState ? "OPEN" : "CLOSED");
   Serial.print("Door open/close count: ");
   Serial.println(doorCount);
   Serial.print("Fan RPM: ");
