@@ -22,14 +22,14 @@
 #define SD_CS 5  // SD Card Chip Select
 
 // WiFi & MQTT Credentials
-const char* ssid = "Kumar 2";
-const char* password = "ipl@2023";
-// const char* ssid = "Airtel_amit_4422";
-// const char* password = "Abhay4422";
+// const char* ssid = "Kumar 2";
+// const char* password = "ipl@2023";
+const char* ssid = "shiv5G";
+const char* password = "123456789";
 // const char* mqtt_server = "your_MQTT_BROKER";
 const int mqttPort = 1883;
 const char* HSTopic = "sensor_data/test";
-const char* RQTopic = "Ref01/read";
+
 // const char* HSTopic = "topic/Handshake";
 const char* mqttServer = "api.coolmaxcloud.com";  // Replace with your broker
 const char* mqttUser = "user";  // Replace with your broker
@@ -37,8 +37,8 @@ const char* mqttPassword = "password";  // Replace with your broker
 
 //const int mqttPort = 1883;
 
-#define MQTT_PUBLISH_TOPIC "device/data"
-#define MQTT_SUBSCRIBE_TOPIC "device/control"
+// #define MQTT_PUBLISH_TOPIC "device/data"
+// #define MQTT_SUBSCRIBE_TOPIC "device/control"
 
 
 

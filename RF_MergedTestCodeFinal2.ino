@@ -39,8 +39,8 @@ setupMQTT();
   setupDHT22();  // Initialize the DHT22 sensor
 
   setupIRSensor();      // Setup the IR sensor and interrupt
-  rtcSetup();
-  syncRTCWithNTP();
+  // rtcSetup();
+  // syncRTCWithNTP();
 
   lastTime = millis();  // Initialize last time
  // setupWiFi();
@@ -55,7 +55,7 @@ setupMQTT();
  reconnectMQTT();
   // handshake();
   
-  //client.publish("iot/handshake", "-1");
+  client.publish("iot/dataCM", "-1");
 
   // Create FreeRTOS Task
  xTaskCreatePinnedToCore(sendDataToCloud, "MqttTask", 4096, NULL, 1, NULL, 0);
@@ -79,8 +79,8 @@ void loop() {
     readTemperature();                // Ds18b20 Temperature
     readPZEMData();  // Electrical
     calculateRPM();  // Continuously calculate RPM every second
-    getTimeStamp();
-    dataToPacket(temperature,humidity,tempDS18B20,doorState,doorCount,voltage,current,power,energy,frequency,pf,rpm,relayState,dateTimeStr);
+   // getTimeStamp();
+    dataToPacket(temperature,humidity,tempDS18B20,doorState,doorCount,voltage,current,power,energy,frequency,pf,rpm,relayState);
     logDataToSD(logEntry); 
      dataPrinting();
     lastTime = millis();              // Reset the timer
@@ -95,9 +95,7 @@ void loop() {
 
   processDoorState();  // Handle door open/close events
  
-  //------------------Printing Data TO Serial Moniter-----------------------------------------------------------
-
-
+  //------------------Printing Data TO Serial Moniter----------------------------------------------------------------------------------------------------------------------------------
 
 
   // delay(5000);

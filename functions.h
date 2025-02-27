@@ -468,13 +468,13 @@ void relayon(){
 }
 
 
- String dataToPacket(float temperature, float humidity, float tempDS18B20, bool doorState, int doorCount, float voltage, float current, float power, float energy, float frequency, float pf,float rpm, String relayState, String dateTimeStr){
+ String dataToPacket(float temperature, float humidity, float tempDS18B20, bool doorState, int doorCount, float voltage, float current, float power, float energy, float frequency, float pf,float rpm, String relayState){
    
-    logEntry = "{ TimeStamp: " + String(dateTimeStr) + " ";
-    logEntry += "DHT Temp: " + String(temperature) + "C, ";
+   // logEntry = "{ TimeStamp: " + String(dateTimeStr) + " ";
+    logEntry = "DHT Temp: " + String(temperature) + "C, ";
     logEntry += "DHT Humidity: " + String(humidity) + ", ";
     logEntry += "DS18B20 Temp: " + String(tempDS18B20) + "C, ";
-    logEntry += "Door Status: " + String(doorState) + ",";
+    logEntry += "Door Status: " + String(doorState) + ", ";
     logEntry += "Door Count: " + String(doorCount) + ", ";
     logEntry += "Voltage: " + String(voltage) + "V, ";
     logEntry += "Current: " + String(current) + "A, ";
