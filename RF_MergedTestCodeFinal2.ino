@@ -5,7 +5,6 @@ float temp;
 float  hum;
 float  inTemp;
 
-
 WiFiClient espClient;
 PubSubClient client(espClient);
 SemaphoreHandle_t sdMutex;
@@ -39,9 +38,9 @@ setupMQTT();
   setupDHT22();  // Initialize the DHT22 sensor
 
   setupIRSensor();      // Setup the IR sensor and interrupt
-  // rtcSetup();
+  rtcSetup();
   // syncRTCWithNTP();
-
+lastRestartTime = millis();
   lastTime = millis();  // Initialize last time
  // setupWiFi();
  client.setServer(mqttServer, 1883);
@@ -64,7 +63,9 @@ setupMQTT();
 void loop() {
 
   client.loop();
- handleMQTT();  // Maintain MQTT connection
+ handleMQTT();  
+
+ // Maintain MQTT connection
 
     // Request data every 10 seconds
     // static unsigned long lastRequestTime = 0;
@@ -79,15 +80,15 @@ void loop() {
     readTemperature();                // Ds18b20 Temperature
     readPZEMData();  // Electrical
     calculateRPM();  // Continuously calculate RPM every second
-   // getTimeStamp();
-    dataToPacket(temperature,humidity,tempDS18B20,doorState,doorCount,voltage,current,power,energy,frequency,pf,rpm,relayState);
+   getTimeStamp();
+    dataToPacket(temperature,humidity,tempDS18B20,doorState,doorCount,rpm,voltage,current,power,energy,frequency,dateTimeStr);
     logDataToSD(logEntry); 
      dataPrinting();
     lastTime = millis();              // Reset the timer
   }
-    // 🔄 Check time every 10 minutes (600000 ms)
+    // 🔄 Check time every 30 minutes (600000 ms)
   // static unsigned long lastSync = 0;
-  // if (millis() - lastSync > 120000) {
+  // if (millis() - lastSync > 1800000) {
   //     lastSync = millis();
   //     syncRTCWithNTP();
   // }

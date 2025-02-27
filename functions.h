@@ -21,6 +21,7 @@ bool HSA_Flag = true;
 String relayState = "";
 String c = "";
 String dateTimeStr = "";
+String dateTimeStr1 = "58888678";
 //String dataToWrite();
 void handleMQTT();
 
@@ -39,6 +40,7 @@ float pf=0.0;
 const int blades = 5;
  String logEntry = "";
 // unsigned long lastTime = 0;
+bool flag = false;
 
 void initrelay(){
   pinMode(Relay,OUTPUT);
@@ -141,14 +143,14 @@ void rtcSetup(){
 
 void getTimeStamp(){
 
-  DateTime now = rtc.now();
-    
-      dateTimeStr = String(now.year()) + "-" + 
-                     String(now.month()) + "-" + 
-                     String(now.day()) + " " + 
-                     String(now.hour()) + ":" + 
-                     String(now.minute()) + ":" + 
-                     String(now.second());
+DateTime now = rtc.now();
+
+      dateTimeStr = String(now.year()) + "-";
+      dateTimeStr += String(now.month()) + "-";
+      dateTimeStr += String(now.day()) + ",";
+      dateTimeStr += String(now.hour()) + ":";
+      dateTimeStr += String(now.minute()) + ":";
+      dateTimeStr += String(now.second()) + "";
 Serial.println(dateTimeStr);
 }
 
@@ -331,6 +333,7 @@ void logDataToSD(const String &data) {
             Serial.println("\u2705 Logged: " + data);
         } else {
             Serial.println("\u274C Failed to write to SD!");
+            flag = true;
         }
         xSemaphoreGive(sdMutex);
     }
@@ -340,11 +343,11 @@ void logDataToSD(const String &data) {
 void sendDataToCloud(void *parameter) {
     while (1) {
         reconnectMQTT();
-      if(HSA_Flag){
         if (xSemaphoreTake(sdMutex, portMAX_DELAY)) {  // Lock SD card access
             File file = SD.open("/log.txt", FILE_READ);
             if (!file) {
                 Serial.println("\u274C Failed to open log file!");
+                flag = true;
             } else {
                 while (file.available()) {
                     String line = file.readStringUntil('\n');
@@ -355,19 +358,14 @@ void sendDataToCloud(void *parameter) {
                 file.close();
                 SD.remove("/log.txt");
                 Serial.println("\u2705 Data sent & log cleared!");
+                flag  = false;
             }
             xSemaphoreGive(sdMutex);
         }
         vTaskDelay(10000 / portTICK_PERIOD_MS);
-    }
+    
     }
 }
-
-
-
-
-
-
 
 
 
@@ -468,9 +466,9 @@ void relayon(){
 }
 
 
- String dataToPacket(float temperature, float humidity, float tempDS18B20, bool doorState, int doorCount, float voltage, float current, float power, float energy, float frequency, float pf,float rpm, String relayState){
+ String dataToPacket(float temperature, float humidity, float tempDS18B20, bool doorState, int doorCount, float rpm, float voltage, float current, float power, float energy, float frequency, String dateTimeStr){
    
-   // logEntry = "{ TimeStamp: " + String(dateTimeStr) + " ";
+
     logEntry = "DHT Temp: " + String(temperature) + "C, ";
     logEntry += "DHT Humidity: " + String(humidity) + ", ";
     logEntry += "DS18B20 Temp: " + String(tempDS18B20) + "C, ";
@@ -481,9 +479,10 @@ void relayon(){
     logEntry += "Power: " + String(power) + "W, ";
     logEntry += "Energy: " + String(energy) + "KWH, ";
     logEntry += "Frequency: " + String(frequency) + "Hz, ";
-    logEntry += "Power Factor: " + String(pf) + ", ";
+    // logEntry += "Power Factor: " + String(pf) + ", ";
     logEntry += "Fan RPM: " + String(rpm) + ", ";
-    logEntry += "Power Status: " + String(relayState) + "}";
+    // logEntry += "Power Status: " + String(relayState) + ", ";
+    logEntry += "time: " + dateTimeStr + "}";
     Serial.println("Log Entry Completed!");
     Serial.println(logEntry);
 
