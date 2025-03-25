@@ -4,19 +4,18 @@
 #include <Arduino.h>
 #include <OneWire.h>
 #include <DallasTemperature.h>
+#include <DHT.h>  // Include DHT sensor library
+#include <RTClib.h>          // Library for DS3231/DS1307 RTC
 #include <NTPClient.h>       // For getting time from NTP server
+#include <WiFi.h>
 #include <WiFiUdp.h>         // UDP for NTP
 #include <Wire.h>
-#include <RTClib.h>          // Library for DS3231/DS1307 RTC
-
-
-#include <Arduino.h>
+#include <esp_task_wdt.h>
 #include <PZEM004Tv30.h>
-
-#include <WiFi.h>
 #include <PubSubClient.h>
 #include <SD.h>
 #include <SPI.h>
+// #include <Arduino.h>
 
 extern volatile int pulseCount;   // Variable to count pulses
 extern float rpm;                 // Variable to store calculated RPM
@@ -24,7 +23,6 @@ extern unsigned long lastTime;    // To track time for RPM calculation
 
 void IRAM_ATTR pulseDetected();
 
-#include <DHT.h>  // Include DHT sensor library
 
 extern DHT dht;           // Declare the DHT sensor object
 extern float temperature; // Variable to store temperature
